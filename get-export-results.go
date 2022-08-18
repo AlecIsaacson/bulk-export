@@ -134,9 +134,9 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		}
-		defer outFile.Close()
 
 		_, err = io.Copy(outFile, resp.Body)
+		outFile.Close()
 	}
 
 	// Almost there, let's create an info file so we remember what this export job was about.
