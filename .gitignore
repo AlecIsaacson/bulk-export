@@ -24,3 +24,6 @@ go.work
 *.json
 *.launch
 *.info
+*.json.gz
+*.csv
+*.sh
