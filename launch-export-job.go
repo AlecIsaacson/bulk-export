@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/machinebox/graphql"
 )
@@ -27,24 +26,16 @@ type nrResponseStruct struct {
 }
 
 func main() {
-	var periodStart time.Time
-	var periodEnd time.Time
 
 	nrAPI := flag.String("apikey", "", "New Relic admin user API Key")
 	logVerbose := flag.Bool("verbose", false, "Writes verbose logs for debugging")
 	accountId := flag.Int("account", 0, "New Relic account ID")
-	startDate := flag.String("start", "", "Starting date you want to query YYYY-MM-DD format")
-	endDate := flag.String("end", "", "Ending date you want to query YYYY-MM-DD format")
+	exportQuery := flag.String("nrql", "", "NRQL query to execute")
 	flag.Parse()
-
-	dateLayout := "2006-01-02"
-	periodStart, _ = time.Parse(dateLayout, *startDate)
-	periodEnd, _ = time.Parse(dateLayout, *endDate)
 
 	if *logVerbose {
 		fmt.Println("Bulk export util v1.0")
 		fmt.Println("Verbose logging enabled")
-		fmt.Println(periodStart, periodEnd)
 	}
 
 	graphqlClient := graphql.NewClient("https://api.newrelic.com/graphql")
@@ -52,7 +43,7 @@ func main() {
 	// Note that the query is of type String! here.  That may not be respecting the standard rules for our API calls.
 	// In most of the cases I've seen, it should be of type Nrql!.
 	graphqlRequest := graphql.NewRequest(`
-	mutation ($accountId: Int!, $query: String!) {
+	mutation ($accountId: Int!, $query: Nrql!) {
 		historicalDataExportCreateExport(accountId: $accountId, nrql: $query) {
 		id
 		message
@@ -65,13 +56,12 @@ func main() {
 
 	var graphqlResponse nrResponseStruct
 
-	exportQuery := fmt.Sprintf("FROM Query SELECT user, account, timestamp WHERE targetEventType = 'nrAQMIncident' since '%v' until '%v'", periodStart.Format(dateLayout), periodEnd.Format(dateLayout))
-	graphqlRequest.Var("query", exportQuery)
+	graphqlRequest.Var("query", *exportQuery)
 	graphqlRequest.Var("accountId", *accountId)
 	graphqlRequest.Header.Set("API-Key", *nrAPI)
 
 	if *logVerbose {
-		fmt.Println(exportQuery)
+		fmt.Println(*exportQuery)
 		fmt.Println(graphqlRequest)
 	}
 

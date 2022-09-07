@@ -26,11 +26,12 @@ type nrResponseStruct struct {
 					Account struct {
 						ID int `json:"id"`
 					} `json:"account"`
-					AvailableUntil  int64       `json:"availableUntil"`
-					BeginTime       int64       `json:"beginTime"`
-					EndTime         int64       `json:"endTime"`
-					ID              string      `json:"id"`
-					InternalStatus  string      `json:"internalStatus"`
+					AvailableUntil int64  `json:"availableUntil"`
+					BeginTime      int64  `json:"beginTime"`
+					EndTime        int64  `json:"endTime"`
+					FileCount      int    `json:"fileCount"`
+					ID             string `json:"id"`
+					//InternalStatus  string      `json:"internalStatus"`
 					Message         interface{} `json:"message"`
 					Nrql            string      `json:"nrql"`
 					PercentComplete float32     `json:"percentComplete"`
@@ -154,5 +155,7 @@ func main() {
 	infoFile.WriteString("Query since: " + strconv.FormatInt(graphqlResponse.Actor.Account.HistoricalDataExport.Export.BeginTime, 10) + "\n")
 	infoFile.WriteString("Query until: " + strconv.FormatInt(graphqlResponse.Actor.Account.HistoricalDataExport.Export.EndTime, 10) + "\n")
 	infoFile.WriteString("Submitted at: " + strconv.FormatInt(graphqlResponse.Actor.Account.HistoricalDataExport.Export.SubmittedAt, 10) + "\n")
-	infoFile.WriteString("Updated at: " + strconv.FormatInt(graphqlResponse.Actor.Account.HistoricalDataExport.Export.UpdatedAt, 10) + "\n")
+	//infoFile.WriteString("Updated at: " + strconv.FormatInt(graphqlResponse.Actor.Account.HistoricalDataExport.Export.UpdatedAt, 10) + "\n")
+	infoFile.WriteString("Expected file count: " + strconv.Itoa(graphqlResponse.Actor.Account.HistoricalDataExport.Export.FileCount) + "\n")
+	//infoFile.WriteString("Downloaded file count: " + strconv.FormatInt(i, 10) + "\n")
 }

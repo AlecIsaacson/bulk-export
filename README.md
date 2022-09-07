@@ -5,20 +5,17 @@ These are two utilities that help with New Relic's bulk export feature.
 ## launch-export-job
 This command line app can be used to launch a bulk export job.  
 
-**Please note that the export query is hard coded in the app.  You'll probably want to change it to reflect your specific query**
-
 The app expects the following arguments:
 
 - account - The ID of the New Relic account you want to run the query against.  
 - apikey - A user key that corresponds to the account you're querying.  
-- start - The beginning of the date range for your query in YYYY-MM-DD form.  
-- end - The end of the date range for your query in YYYY-MM-DD form.  
+- nrql - The NRQL query that generates the data you want to export.
 
 You can optionally set -verbose=true for more info when you run the app.
 
 As an example:
 
-./launch-export-job -apikey=(MyNRUserKey) -account=(MyAccountId) -start=2022-05-01 -end=2022-05-07
+./launch-export-job -apikey=(MyNRUserKey) -account=(MyAccountId) -nrql "FROM Transaction SELECT appName, host, duration, http.statusCode SINCE '2022-01-01' UNTIL '2022-01-07'"
 
 On success, the utility returns the ID of your export job.  It also creates a file called (exportJobID).launch with details on the export job.
 
