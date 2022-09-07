@@ -1,4 +1,4 @@
-// This app will start a New Relic bulk export job.  I've hardcoded my specific query here.  You'll probably want to change that.
+// This app will start a New Relic bulk export job.
 package main
 
 import (
@@ -11,8 +11,9 @@ import (
 	"github.com/machinebox/graphql"
 )
 
+//Define the API call response structure.
 //Don't forget that the interactive GraphQL endpoint adds the data part of the struct, while the
-// programmatic endpoint doesn't.
+//programmatic endpoint doesn't.
 type nrResponseStruct struct {
 	//Data struct {
 	HistoricalDataExportCreateExport struct {
@@ -27,6 +28,7 @@ type nrResponseStruct struct {
 
 func main() {
 
+	//Define command line flags.
 	nrAPI := flag.String("apikey", "", "New Relic admin user API Key")
 	logVerbose := flag.Bool("verbose", false, "Writes verbose logs for debugging")
 	accountId := flag.Int("account", 0, "New Relic account ID")
@@ -34,14 +36,14 @@ func main() {
 	flag.Parse()
 
 	if *logVerbose {
-		fmt.Println("Bulk export util v1.0")
+		fmt.Println("Bulk export util v2.0")
 		fmt.Println("Verbose logging enabled")
 	}
 
+	//Define API endpoint
 	graphqlClient := graphql.NewClient("https://api.newrelic.com/graphql")
 
-	// Note that the query is of type String! here.  That may not be respecting the standard rules for our API calls.
-	// In most of the cases I've seen, it should be of type Nrql!.
+	//Define request structure.
 	graphqlRequest := graphql.NewRequest(`
 	mutation ($accountId: Int!, $query: Nrql!) {
 		historicalDataExportCreateExport(accountId: $accountId, nrql: $query) {
@@ -56,6 +58,7 @@ func main() {
 
 	var graphqlResponse nrResponseStruct
 
+	//Fill in the request variables.
 	graphqlRequest.Var("query", *exportQuery)
 	graphqlRequest.Var("accountId", *accountId)
 	graphqlRequest.Header.Set("API-Key", *nrAPI)
@@ -65,11 +68,13 @@ func main() {
 		fmt.Println(graphqlRequest)
 	}
 
+	//Execute the request.  If the request is malformed (i.e. bad NRQL), we panic and post the error message.
 	if err := graphqlClient.Run(context.Background(), graphqlRequest, &graphqlResponse); err != nil {
 		panic(err)
 		fmt.Println(graphqlResponse)
 	}
 
+	//We successfully launched the job, so now we write the job ID to the screen.
 	fmt.Println("Export job ID: " + graphqlResponse.HistoricalDataExportCreateExport.ID)
 
 	if *logVerbose {
